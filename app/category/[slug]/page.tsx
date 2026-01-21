@@ -3,8 +3,15 @@ import { products } from '@/lib/data';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 
-export default async function CategoryPage({ params }: { params: { slug: string } }) {
+// ✅ Fix: Update type to Promise<{ slug: string }>
+export default async function CategoryPage({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  // ✅ Fix: Await the params object before destructuring
   const { slug } = await params;
+  
   const categoryProducts = products.filter(p => p.category === slug);
   
   if (categoryProducts.length === 0 && !['hijabs', 'abayas', 'pakistani-suits'].includes(slug)) {
