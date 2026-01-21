@@ -1,16 +1,17 @@
 'use client';
 
-import React, { Suspense } from 'react'; // ✅ Import Suspense
+import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client'; // ✅ Fix import
+import { createClient } from '@/lib/supabase/client'; // ✅ Correct import
 import Link from 'next/link';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 
-// ✅ Create a separate component for the logic that uses searchParams
 function LoginForm() {
+  // ✅ Initialize the client here
+  const supabase = createClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/account'; // ✅ Uses searchParams
+  const redirectPath = searchParams.get('redirect') || '/account';
   
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -103,7 +104,6 @@ function LoginForm() {
   );
 }
 
-// ✅ Main Page Component wraps the form in Suspense
 export default function LoginPage() {
   return (
     <div className="min-h-screen pt-32 pb-24 px-6 flex items-center justify-center bg-[#0A0A0A]">
@@ -113,7 +113,6 @@ export default function LoginPage() {
           <p className="text-white/50">Sign in to access your account and orders.</p>
         </div>
 
-        {/* ✅ Wrap with Suspense boundary */}
         <Suspense fallback={<div className="text-white text-center">Loading login form...</div>}>
           <LoginForm />
         </Suspense>
