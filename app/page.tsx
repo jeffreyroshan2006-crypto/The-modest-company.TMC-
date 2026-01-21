@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // ✅ Import Next.js Image component
 import { ArrowRight, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { products } from '@/lib/data';
@@ -13,10 +14,14 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img 
+          {/* ✅ Replaced <img> with <Image> */}
+          <Image 
             src="https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=1920" 
             alt="Luxury Modest Wear" 
-            className="w-full h-full object-cover opacity-60 scale-105 animate-slow-zoom"
+            fill // ✅ Fills the parent container
+            className="object-cover opacity-60 scale-105 animate-slow-zoom"
+            priority // ✅ Load this immediately (LCP optimization)
+            unoptimized // ✅ Bypass external domain config for now
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[#0A0A0A]" />
         </div>
@@ -57,14 +62,17 @@ export default function HomePage() {
               { name: 'Abayas', slug: 'abayas', img: 'https://images.unsplash.com/photo-1564113808230-e8b2e544aa0e?q=80&w=800' },
               { name: 'Pakistani Suits', slug: 'pakistani-suits', img: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?q=80&w=800' },
             ].map((cat) => (
-              <Link key={cat.slug} href={`/category/${cat.slug}`} className="group relative aspect-[4/5] overflow-hidden">
-                <img 
+              <Link key={cat.slug} href={`/category/${cat.slug}`} className="group relative aspect-[4/5] overflow-hidden block">
+                 {/* ✅ Replaced <img> with <Image> */}
+                <Image 
                   src={cat.img} 
                   alt={cat.name} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
                   <h3 className="text-white text-3xl font-serif mb-4">{cat.name}</h3>
                   <span className="text-[#D4AF37] text-[10px] uppercase tracking-[0.3em] border-b border-[#D4AF37] pb-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     Explore Now
