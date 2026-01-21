@@ -44,7 +44,7 @@ export default function CheckoutPage() {
       }
 
       // Create order in Supabase
-      // ✅ FIX: Added "as any" to bypass strict type checking for now
+      // Using "as any" to bypass strict type check for build
       const { error } = await supabase.from('orders').insert({
         user_id: user.id,
         total_amount: cartTotal,
@@ -172,4 +172,69 @@ export default function CheckoutPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm t
+                <label className="text-sm text-white/70">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  required
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="w-full bg-[#111] border border-white/10 p-3 text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#D4AF37] text-black py-4 font-bold uppercase tracking-widest hover:bg-[#B8860B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center mt-8"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="animate-spin mr-2" size={20} />
+                    Processing...
+                  </>
+                ) : (
+                  'Place Order'
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Order Summary */}
+          <div className="bg-[#111] p-8 border border-white/5 h-fit">
+            <h2 className="text-xl font-serif text-white mb-6">Order Summary</h2>
+            <div className="space-y-4 mb-6">
+              {cart.map((item) => (
+                <div key={`${item.id}-${item.selectedSize}-${item.selectedColor}`} className="flex justify-between text-sm">
+                  <div className="text-white/70">
+                    <span className="text-white">{item.quantity}x</span> {item.name}
+                    <div className="text-xs text-white/30 ml-5">
+                      {item.selectedSize} / {item.selectedColor}
+                    </div>
+                  </div>
+                  <div className="text-white">₹{(item.price * item.quantity).toLocaleString()}</div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="border-t border-white/10 pt-4 space-y-2">
+              <div className="flex justify-between text-white/70">
+                <span>Subtotal</span>
+                <span>₹{cartTotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-white/70">
+                <span>Shipping</span>
+                <span>Free</span>
+              </div>
+              <div className="flex justify-between text-[#D4AF37] font-bold text-lg pt-2 border-t border-white/10 mt-2">
+                <span>Total</span>
+                <span>₹{cartTotal.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
