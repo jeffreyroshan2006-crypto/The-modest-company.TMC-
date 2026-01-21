@@ -1,115 +1,122 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import React, { Suspense } from 'react'; // ✅ Import Suspense
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase/client'; // ✅ Fix import
 import Link from 'next/link';
+import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+// ✅ Create a separate component for the logic that uses searchParams
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
-
-  useEffect(() => {
-    const msg = searchParams.get('message');
-    const err = searchParams.get('error');
-    if (msg) setMessage(msg);
-    if (err) setError(err);
-  }, [searchParams]);
-
-  // Check if user is already logged in
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        router.push('/account');
-      }
-    };
-    checkUser();
-  }, [router, supabase.auth]);
+  const redirectPath = searchParams.get('redirect') || '/account'; // ✅ Uses searchParams
+  
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setMessage(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      router.push('/account');
+      if (error) throw error;
+
+      router.push(redirectPath);
       router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="pt-20 pb-24 px-6 flex items-center justify-center min-h-[80vh]">
-      <div className="max-w-md w-full bg-[#171717] p-8 md:p-12 border border-white/5">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-serif text-white mb-2">Welcome Back</h1>
-          <p className="text-white/50 text-sm">Sign in to your TMC account</p>
+    <form onSubmit={handleLogin} className="space-y-6">
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/50 p-4 flex items-center gap-3 text-red-400">
+          <AlertCircle size={20} />
+          <span className="text-sm">{error}</span>
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <label className="text-sm text-white/70">Email Address</label>
+        <div className="relative">
+          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full bg-[#111] border border-white/10 pl-12 pr-4 py-3 text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+            placeholder="you@example.com"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-sm text-white/70">Password</label>
+        <div className="relative">
+          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" size={18} />
+          <input
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full bg-[#111] border border-white/10 pl-12 pr-4 py-3 text-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+            placeholder="••••••••"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[#D4AF37] text-black py-4 font-bold uppercase tracking-widest hover:bg-[#B8860B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="animate-spin mr-2" size={20} />
+            Signing In...
+          </>
+        ) : (
+          'Sign In'
+        )}
+      </button>
+
+      <p className="text-center text-white/50 text-sm">
+        Don't have an account?{' '}
+        <Link href={`/register?redirect=${redirectPath}`} className="text-[#D4AF37] hover:underline">
+          Create one
+        </Link>
+      </p>
+    </form>
+  );
+}
+
+// ✅ Main Page Component wraps the form in Suspense
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen pt-32 pb-24 px-6 flex items-center justify-center bg-[#0A0A0A]">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-12">
+          <h1 className="text-3xl font-serif text-white mb-4">Welcome Back</h1>
+          <p className="text-white/50">Sign in to access your account and orders.</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-white/50">Email Address</label>
-            <input 
-              type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full bg-white/5 border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37]" 
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase tracking-widest text-white/50">Password</label>
-            <input 
-              type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full bg-white/5 border border-white/10 px-4 py-3 text-white focus:outline-none focus:border-[#D4AF37]" 
-            />
-          </div>
-
-          {error && <p className="text-red-500 text-xs bg-red-500/10 p-3 border border-red-500/20">{error}</p>}
-          {message && <p className="text-[#D4AF37] text-xs bg-[#D4AF37]/10 p-3 border border-[#D4AF37]/20">{message}</p>}
-
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#D4AF37] text-black font-bold uppercase tracking-[0.2em] py-4 hover:bg-[#B8860B] transition-colors disabled:opacity-50"
-          >
-            {loading ? 'Processing...' : 'Sign In'}
-          </button>
-          
-          <div className="relative py-4">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/5"></div>
-            </div>
-            <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
-              <span className="bg-[#171717] px-2 text-white/30">New to TMC?</span>
-            </div>
-          </div>
-
-          <Link 
-            href="/signup"
-            className="block w-full text-center border border-white/10 text-white font-bold uppercase tracking-[0.2em] py-4 hover:bg-white/5 transition-colors"
-          >
-            Create Account
-          </Link>
-        </form>
+        {/* ✅ Wrap with Suspense boundary */}
+        <Suspense fallback={<div className="text-white text-center">Loading login form...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );
