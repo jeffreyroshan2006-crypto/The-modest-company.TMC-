@@ -1,5 +1,5 @@
-- **Premium E-commerce Catalog & Checkout:** A high-end shopping experience featuring categorized product listings (Hijabs, Abayas, Pakistani Suits), detailed product pages with variant selection (size/color), a persistent shopping cart, and a streamlined checkout process including wishlist and coupon support.
-- **Brand Identity & Social Proof Modules:** Dedicated sections for the "TMC" brand story and founder profile, a "Happy Clients" testimonial slider with photo placeholders, and a "Collabs" brand strip to showcase industry partnerships and influencer collaborations.
-- **Interactive Pop-up Event Management:** A specialized "Pop-up Events" section that lists upcoming physical brand showcases with detailed event cards and an integrated RSVP call-to-action for customers.
-- **Direct-to-Brand Communication Suite:** Integrated WhatsApp "Click to Chat" functionality as a primary CTA, a dedicated contact page featuring a simple inquiry form, and clearly displayed operational hours (11am–8pm) to manage customer expectations.
-- **Customer Account & Information Hub:** A secure user dashboard for order tracking and history, complemented by comprehensive, easy-to-navigate policy pages for shipping, returns, and privacy to establish brand authenticity and trust.
+- Ensure the application has a standardized configuration process that allows it to run consistently across different environments (e.g., local, staging, and production).
+- Implement a validation mechanism to verify that the application and all its core features are fully operational immediately after the deployment process.
+- Establish a graceful error-handling system that prevents the application from crashing and provides user-friendly feedback during unexpected failures.
+- Define a clear and repeatable startup sequence that ensures all necessary background services and components are initialized before the user interacts with the site.
+- Verify that all external integrations and data connections are correctly linked and functional to prevent "broken" states upon initial launch.

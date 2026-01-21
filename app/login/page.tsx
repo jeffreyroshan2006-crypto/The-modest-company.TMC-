@@ -1,21 +1,43 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+
+  useEffect(() => {
+    const msg = searchParams.get('message');
+    const err = searchParams.get('error');
+    if (msg) setMessage(msg);
+    if (err) setError(err);
+  }, [searchParams]);
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        router.push('/account');
+      }
+    };
+    checkUser();
+  }, [router, supabase.auth]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setMessage(null);
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -29,22 +51,6 @@ export default function LoginPage() {
       router.push('/account');
       router.refresh();
     }
-  };
-
-  const handleSignUp = async () => {
-    setLoading(true);
-    setError(null);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setError('Check your email for the confirmation link.');
-    }
-    setLoading(false);
   };
 
   return (
@@ -77,7 +83,8 @@ export default function LoginPage() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-xs">{error}</p>}
+          {error && <p className="text-red-500 text-xs bg-red-500/10 p-3 border border-red-500/20">{error}</p>}
+          {message && <p className="text-[#D4AF37] text-xs bg-[#D4AF37]/10 p-3 border border-[#D4AF37]/20">{message}</p>}
 
           <button 
             type="submit"
@@ -87,14 +94,21 @@ export default function LoginPage() {
             {loading ? 'Processing...' : 'Sign In'}
           </button>
           
-          <button 
-            type="button"
-            onClick={handleSignUp}
-            disabled={loading}
-            className="w-full border border-white/10 text-white font-bold uppercase tracking-[0.2em] py-4 hover:bg-white/5 transition-colors disabled:opacity-50"
+          <div className="relative py-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/5"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase tracking-widest">
+              <span className="bg-[#171717] px-2 text-white/30">New to TMC?</span>
+            </div>
+          </div>
+
+          <Link 
+            href="/signup"
+            className="block w-full text-center border border-white/10 text-white font-bold uppercase tracking-[0.2em] py-4 hover:bg-white/5 transition-colors"
           >
             Create Account
-          </button>
+          </Link>
         </form>
       </div>
     </div>

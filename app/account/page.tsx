@@ -2,6 +2,7 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Package, User, MapPin, LogOut } from 'lucide-react';
+import Link from 'next/link';
 
 export default async function AccountPage() {
   const supabase = await createClient();
@@ -11,11 +12,16 @@ export default async function AccountPage() {
     redirect('/login');
   }
 
-  const { data: orders } = await supabase
+  // Fetch orders safely, handle case where table might not exist yet or error
+  const { data: orders, error: ordersError } = await supabase
     .from('orders')
     .select('*')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  if (ordersError && ordersError.code !== 'PGRST116') {
+    console.error('Error fetching orders:', ordersError);
+  }
 
   return (
     <div className="pt-20 pb-24 px-6">
