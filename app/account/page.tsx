@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client'; // ✅ FIXED IMPORT
 import { LogOut, Package, User } from 'lucide-react';
 
 // ✅ Fix 1: Define the Interface for an Order
@@ -15,6 +15,9 @@ interface Order {
 
 export default function AccountPage() {
   const router = useRouter();
+  // ✅ Create the client inside the component
+  const supabase = createClient();
+  
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -50,7 +53,7 @@ export default function AccountPage() {
     };
     
     checkUser();
-  }, [router]);
+  }, [router, supabase]); // ✅ Added supabase to dependencies
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
