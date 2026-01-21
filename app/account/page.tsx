@@ -11,42 +11,44 @@ interface Order {
   total_amount: number;
   status: string;
   created_at: string;
-  // Add other fields if needed
 }
 
 export default function AccountPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  
-  // ✅ Fix 2: Use the Order[] interface in useState
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        router.push('/login');
-        return;
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          router.push('/login');
+          return;
+        }
+        
+        setUserEmail(user.email || null);
+        
+        // Fetch orders
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (data) {
+          setOrders(data);
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error checking user:', err);
+        setLoading(false);
       }
-
-      setUserEmail(user.email || null);
-
-      // Fetch orders
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (data) {
-        setOrders(data);
-      }
-      
-      setLoading(false);
     };
-
+    
     checkUser();
   }, [router]);
 
