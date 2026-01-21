@@ -1,11 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',  // This tells Next.js to create static HTML files
+  // We removed 'output: export' because Vercel handles the build automatically
   images: {
-    unoptimized: true, // Required for static export
+    unoptimized: true, // You can keep this or remove it. keeping it is safer for now.
   },
-  // If your repo is NOT at the root domain, you might need basePath:
-  // basePath: '/The-modest-company.TMC-',
-}
+};
 
-module.exports = nextConfig
+export default nextConfig;
+
